@@ -1,4 +1,4 @@
-document.querySelector('.map').classList.remove('map--faded');
+// document.querySelector('.map').classList.remove('map--faded');
 var titles = [
     'Большая уютная квартира',
     'Маленькая неуютная квартира',
@@ -22,7 +22,7 @@ var MIN_ROOMS = 2;
 var MAX_ROOMS = 5;
 var MIN_GUESTS = 3;
 var MAX_GUESTS = 13;
-var element = document.querySelector("div.map__pins")
+var element = document.querySelector("div.map__pins");
 titles.sort(compareRandom);
 //Кординаты маркера на карте
 var minAxisX = 100;
@@ -33,20 +33,21 @@ var minPrice = 1000;
 var maxPrice = 1000000;
 var parent = document.querySelector('.map__pins');
 
+// массив всех данных
 var dataList = insertValues();
 
-for(var i =0; i<dataList.length; i++){
-    var pin = document.createDocumentFragment();
-    pin = createPins(dataList[i]);
-    parent.appendChild(pin);
+var picturePin = function(){
+    for(var i =0; i<dataList.length; i++){
+        var pin = document.createDocumentFragment();
+        pin = createPins(dataList[i]);
+        parent.appendChild(pin);
+    }
 }
 var templateParent = document.querySelector('template').content.querySelector('.map__card');
-var clone  = templateParent.cloneNode(true);
-createDOMElement(dataList[7]);
 
-
-//вспомогательная функция для создания DOM елемента обьявления
+//Отрисовка объявления (большой белый прямоугольник)
 function createDOMElement(arr){
+    var clone  = templateParent.cloneNode(true);
     clone.querySelector('h3').innerHTML = arr.offer.title;
     clone.querySelector('small').innerHTML = arr.offer.addres;
     clone.querySelector('.popup__price').innerHTML = arr.offer.price + '₽/ночь';
@@ -79,22 +80,27 @@ function createDOMElement(arr){
 
     var elemForInsert = document.querySelector('.map__filters-container');
     var insertParent = document.querySelector('.map');
+
+    clone.querySelector('.popup__close').addEventListener('click', function(){
+            clone.remove();
+    })
+    console.log(templateParent);
     insertParent.insertBefore(clone, elemForInsert);
 }
 
 // вспомогательная функция для создания елемента pin
 function createPins(obj){
-        var pin = document.createElement('button');
-        var img = document.createElement('img');
-        pin.classList.add('map__pin');
-        pin.style.cssText = 'left: ' + obj.location.x + 'px; top: ' + obj.location.y + 'px;';
-        img.src = obj.author.avatar;
-        img.alt = obj.offer.title;
-        // img.style.cssText = 'width: 40px; height: 40px';
-        img.width = 40;
-        img.height = 40;
-        pin.appendChild(img);
-        return pin;
+    var pin = document.createElement('button');
+    var img = document.createElement('img');
+    pin.classList.add('map__pin');
+    pin.style.cssText = 'left: ' + obj.location.x + 'px; top: ' + obj.location.y + 'px;';
+    img.src = obj.author.avatar;
+    img.alt = obj.offer.title;
+    img.width = 40;
+    img.height = 40;
+    pin.appendChild(img);
+    pin.setAttribute("disabled", "disabled");
+    return pin;
 }
 
 // основная функция для заполнения массива данных list
@@ -187,3 +193,31 @@ function getArrRandomSize(arr){
     clone.length = randomInteger(1, clone.length+1);
     return clone;
 }
+
+function getCoords(elem) { // кроме IE8-
+  var box = elem.getBoundingClientRect();
+
+  return {
+    top: box.top + pageYOffset,
+    left: box.left + pageXOffset
+  };
+
+}
+
+// событие клика на карту
+document.querySelector('.map').addEventListener('click', function(e){
+    var elem = e.target;
+    for (var i = 0; i < dataList.length; i++) {
+        if(elem.alt == dataList[i].offer.title)
+        createDOMElement(dataList[i]);
+    }
+});
+
+// событие
+document.querySelector('.map__pin--main').addEventListener('mouseup', function(){
+    document.querySelector('.map').classList.remove('map--faded');
+    document.querySelector('.notice__form').classList.remove('notice__form--disabled');
+        var temp = getCoords(document.querySelector('.map__pin'));
+    document.querySelector('.notice__form').querySelector('#address').value = Math.floor(temp.top) + ' ' + Math.floor(temp.left);
+    picturePin();
+});
