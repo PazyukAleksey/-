@@ -82,9 +82,11 @@ function createDOMElement(arr){
     var insertParent = document.querySelector('.map');
 
     clone.querySelector('.popup__close').addEventListener('click', function(){
-            clone.remove();
+        var mapCards = document.querySelectorAll('.map__card');
+        for(var i = 0; i < mapCards.length; i++){
+            mapCards[i].remove();
+        }
     })
-    console.log(templateParent);
     insertParent.insertBefore(clone, elemForInsert);
 }
 
